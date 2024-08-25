@@ -1,0 +1,14 @@
+html {
+	height: 100%;
+	color: white;
+}
+
+body {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	flex-wrap: wrap;
+	margin: 0;
+	height: 100%;
+	background: #292336;
+}
