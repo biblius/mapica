@@ -16,13 +16,5 @@
 </main>
 
 <style>
-	main {
-		display: flex;
-		flex-wrap: wrap;
-		justify-content: center;
-		align-items: center;
-		margin: 0.5rem;
-		height: 60%;
-		width: 100%;
-	}
+
 </style>
