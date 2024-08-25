@@ -211,6 +211,7 @@
 
 	.content__map {
 		grid-area: map;
+		align-self: center;
 	}
 
 	.content__info {
@@ -218,7 +219,6 @@
 	}
 
 	.content__map {
-		width: 100%;
-		height: 100%;
+		aspect-ratio: 4 / 3;
 	}
 </style>
