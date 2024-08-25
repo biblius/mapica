@@ -4,6 +4,7 @@
 
 	export let namePlaceholder: string;
 	export let onSubmit: (e: SubmitEvent) => void;
+	export let onTypeChange: (e: Event) => void;
 	export let latLng: LatLng | undefined;
 </script>
 
@@ -43,7 +44,7 @@
 
 		<div class="form__input" role="presentation">
 			<label for="location-type">Type</label>
-			<select name="location-type" id="location-type">
+			<select name="location-type" id="location-type" on:change={onTypeChange}>
 				<option value="leggiero">Leggiero</option>
 				<option value="adventure">Adventure</option>
 			</select>

@@ -12,7 +12,7 @@
 	<h1>Mapica</h1>
 </header>
 <main>
-	<Map markers={data.markers} />
+	<Map locations={data.locations} />
 </main>
 
 <style>

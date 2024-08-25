@@ -1,10 +1,3 @@
-export type Marker = {
-	id: number;
-	name: string;
-	lat: number;
-	lng: number;
-};
-
 export type Location = {
 	description: string;
 	id: number;
