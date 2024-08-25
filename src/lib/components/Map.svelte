@@ -1,13 +1,15 @@
 <script lang="ts">
 	import L, { LatLng, Marker as LMarker, type LeafletMouseEvent } from 'leaflet';
 	import { onMount } from 'svelte';
-	import markerIcon from '$lib/assets/location-pin-svgrepo-com.svg';
-	import type { Marker, Location as LocationM } from '$lib/types';
+	import iconPin from '$lib/assets/location-pin-svgrepo-com.svg';
+	import iconLeggiero from '$lib/assets/leggiero-pin.png';
+	import iconAdventure from '$lib/assets/mountain-pin.png';
+	import type { Location as LocationM } from '$lib/types';
 	import Location from './Location.svelte';
 	import AddMarker from './AddMarker.svelte';
 
-	// The markers to set up on initial component load.
-	export let markers: Marker[];
+	// Initial locations to set up markers for.
+	export let locations: LocationM[];
 
 	// Loaded markers on the map.
 	const mapMarkers = new Map();
@@ -47,7 +49,7 @@
 		if (pin) {
 			pin.setLatLng(e.latlng);
 		} else {
-			pin = L.marker(e.latlng, { icon: iconM() }).addTo(map!);
+			pin = L.marker(e.latlng, { icon: mIconLeggiero() }).addTo(map!);
 		}
 
 		pinLatLng = pin.getLatLng();
@@ -72,36 +74,51 @@
 			`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`
 		);
 		const data = await res.json();
-		console.log(data);
 		return data;
 	}
 
 	// Default marker icon.
-	function iconM() {
+	function mIconPin() {
 		return L.icon({
-			iconUrl: markerIcon,
+			iconUrl: iconPin,
 			iconSize: [38, 95],
 			iconAnchor: [19, 70],
 			popupAnchor: [-3, -76]
-			//shadowUrl: 'my-icon-shadow.png',
-			//shadowSize: [68, 95],
-			//shadowAnchor: [22, 94]
+		});
+	}
+
+	function mIconLeggiero() {
+		return L.icon({
+			iconUrl: iconLeggiero,
+			iconSize: [60, 60],
+			iconAnchor: [31, 72],
+			popupAnchor: [-3, -76]
+		});
+	}
+
+	function mIconAdventure() {
+		return L.icon({
+			iconUrl: iconAdventure,
+			iconSize: [70, 60],
+			iconAnchor: [37, 70],
+			popupAnchor: [-3, -76]
 		});
 	}
 
 	// Adds a marker to the map.
-	async function addMarker(marker: Marker) {
-		const mark = L.marker([marker.lat, marker.lng], {
-			title: marker.name,
-			icon: iconM()
+	async function addMarker(location: LocationM) {
+		const mark = L.marker([location.lat, location.lng], {
+			title: location.name,
+			icon: location.type === 'adventure' ? mIconAdventure() : mIconLeggiero()
 		})
-			.on('click', () => toggleLocationInfo(marker))
+			.on('click', () => toggleLocationInfo(location))
 			.addTo(map);
-		mapMarkers.set(marker.id, mark);
+
+		mapMarkers.set(location.id, mark);
 	}
 
 	// Displays/hides the location info sidebar.
-	async function toggleLocationInfo(marker: Marker) {
+	async function toggleLocationInfo(marker: LocationM) {
 		// Toggle off
 
 		if (locationInfo && locationInfo.id === marker.id) {
@@ -145,7 +162,9 @@
 		});
 
 		const marker = await res.json();
+
 		addMarker(marker);
+
 		if (pin) {
 			map.removeLayer(pin);
 			pin = undefined;
@@ -153,10 +172,27 @@
 		}
 	}
 
+	function togglePinIcon(e: Event) {
+		if (!pin) return;
+
+		const select = e.target as HTMLSelectElement;
+
+		switch (select.value) {
+			case 'adventure':
+				pin.setIcon(mIconAdventure());
+				break;
+			case 'leggiero':
+				pin.setIcon(mIconLeggiero());
+				break;
+			default:
+				pin.setIcon(mIconPin());
+		}
+	}
+
 	onMount(() => {
 		loadMap();
-		for (const marker of markers) {
-			addMarker(marker);
+		for (const location of locations) {
+			addMarker(location);
 		}
 	});
 </script>
@@ -181,6 +217,7 @@
 					namePlaceholder={locationNamePlaceholder || 'My awesome location'}
 					latLng={pinLatLng}
 					onSubmit={createMarker}
+					onTypeChange={togglePinIcon}
 				/>
 			</div>
 		{/if}
