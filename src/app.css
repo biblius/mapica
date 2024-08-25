@@ -2,14 +2,14 @@
 	--color-primary: #292336;
 	--color-white: #FFFFFF;
 
-	--container-max-width: 1200px;
+	--container-max-width: 1440px;
 }
 
 body {
 	color: var(--color-white);
 		background-color: var(--color-primary);
 	}
-	
+
 	.page__container {
 		width: 100%;
 		max-width: var(--container-max-width);

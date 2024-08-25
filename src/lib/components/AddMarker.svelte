@@ -8,24 +8,41 @@
 	export let latLng: LatLng | undefined;
 </script>
 
-<form on:submit|preventDefault={onSubmit}>
-	<fieldset>
-		<legend>Add marker</legend>
+<section class="card">
+	<header class="card__header">
+	<h2 class="card__title">Add marker</h2>
+	</header>
 
-		<p>Lat*: {latLng ? latLng.lat.toFixed(6) : ''}</p>
-		<p>Lng*: {latLng ? latLng.lng.toFixed(6) : ''}</p>
+	<section class="card__content">
+<form on:submit|preventDefault={onSubmit} id="add-marker-form">
+	<div class="form__container" role="presentation">
+	<!-- <fieldset> -->
+		<!-- <legend>Add marker</legend> -->
 
-		<div class="input-container">
-			<label for="name">Name*</label>
+		<!-- <p>Lat*: {latLng ? latLng.lat.toFixed(6) : ''}</p>
+		<p>Lng*: {latLng ? latLng.lng.toFixed(6) : ''}</p> -->
+
+		<div class="form__input" role="presentation">
+			<label for="lat">Latitude</label>
+		<input type="text" readonly name="lat" value={latLng?.lat.toFixed(6)} />
+		</div>
+
+		<div class="form__input" role="presentation">
+			<label for="lat">Longitude</label>
+		<input type="text" readonly name="lng" value={latLng?.lng.toFixed(6)} />
+		</div>
+
+		<div class="form__input" role="presentation">
+			<label for="name">Name</label>
 			<input name="name" type="text" value={namePlaceholder} />
 		</div>
 
-		<div class="input-container">
+		<div class="form__input" role="presentation">
 			<label for="description">Description</label>
 			<textarea name="description" rows="5" placeholder="This place rules!" />
 		</div>
 
-		<div>
+		<div class="form__input" role="presentation">
 			<label for="location-type">Type</label>
 			<select name="location-type" id="location-type" on:change={onTypeChange}>
 				<option value="leggiero">Leggiero</option>
@@ -33,11 +50,17 @@
 			</select>
 		</div>
 
+		<div class="form__input" role="presentation">
 		<div class="lmh-container">
 			<LowMidHigh
 				legend="Water availability"
 				tooltip="How easy it is to restock on water on the location. For example, None means there is no water available, while High means that there is plenty of water sources available in the vicinity."
 			/>
+
+		</div>
+		</div>
+
+		<div class="form__input" role="presentation">
 			<label for="wa-note">Water availability note</label>
 			<textarea
 				name="wa-note"
@@ -46,11 +69,17 @@
 			/>
 		</div>
 
+		<div class="form__input" role="presentation">
 		<div class="lmh-container">
 			<LowMidHigh
 				legend="Vehicle accessibility"
 				tooltip="How easy it is to access the location with a vehicle. A None means a vehicle has to be parked far away, while High means the vehicle can be in the near vicinity."
 			/>
+
+		</div>
+		</div>
+
+		<div class="form__input" role="presentation">
 			<label for="va-note">Vehicle accessibility note</label>
 			<textarea
 				name="va-note"
@@ -59,21 +88,21 @@
 			/>
 		</div>
 
-		<input type="hidden" name="lat" value={latLng?.lat.toFixed(6)} />
-		<input type="hidden" name="lng" value={latLng?.lng.toFixed(6)} />
-	</fieldset>
+		<!-- <input type="hidden" name="lat" value={latLng?.lat.toFixed(6)} />
+		<input type="hidden" name="lng" value={latLng?.lng.toFixed(6)} /> -->
+		</div>
+	<!-- </fieldset> -->
 
-	<button type="submit">Add</button>
+	<!-- <button type="submit">Add</button> -->
 </form>
+</section>
+
+<footer class="card__footer">
+	<button type="submit" form="add-marker-form">Add</button>
+</footer>
+</section>
 
 <style>
-	form {
-		display: flex;
-		justify-content: center;
-		flex-wrap: wrap;
-		width: 100%;
-	}
-
 	form fieldset {
 		width: 100%;
 	}
@@ -81,5 +110,32 @@
 	form input,
 	label {
 		display: block;
+	}
+
+	.card {
+		background-color: var(--color-white);
+		color: var(--color-primary);
+		padding-block: 1.5rem;
+		padding-inline: 1.5rem;
+
+		display: flex;
+		flex-direction: column;
+		gap: 1rem;
+	}
+
+	.card__title {
+		margin: 0;
+	}
+
+	.form__container {
+		display: flex;
+		flex-direction: column;
+		row-gap: 0.75rem;
+	}
+
+	.form__input {
+		display: flex;
+		flex-direction: column;
+		row-gap: 0.5rem;
 	}
 </style>
