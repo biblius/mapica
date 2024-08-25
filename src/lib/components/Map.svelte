@@ -170,9 +170,9 @@
 	/>
 </head>
 
-<div id="map-container">
-	<div id="map"></div>
-	<div id="location-info">
+<article id="map-container" class="content">
+	<section id="map" class="content__map"></section>
+	<section id="location-info" class="content__info">
 		{#if locationInfo}
 			<Location location={locationInfo} />
 		{:else}
@@ -184,20 +184,41 @@
 				/>
 			</div>
 		{/if}
-	</div>
-</div>
+	</section>
+</article>
 
 <style>
-	#map-container {
-		object-fit: cover;
-		width: 80%;
+	.content {
+		--grid-template-areas: "map info";
+		--grid-template-columns: 2fr 1fr;
+		--grid-template-rows: auto;
+
+		@media screen and (max-width: 930px) {
+			--grid-template-areas: "info" "map";
+			--grid-template-columns: 1fr;
+			--grid-template-rows: minmax(500px, 1fr) 1fr;
+		}
+
+		width: 100%;
 		height: 100%;
-		display: flex;
+
+		display: grid;
+		grid-template-columns: var(--grid-template-columns);
+		grid-template-rows: var(--grid-template-rows);
+		grid-template-areas: var(--grid-template-areas);
+		column-gap: 1rem;
 	}
 
-	#map {
-		margin: auto;
-		width: 70%;
-		height: 70%;
+	.content__map {
+		grid-area: map;
+	}
+
+	.content__info {
+		grid-area: info;
+	}
+
+	.content__map {
+		width: 100%;
+		height: 100%;
 	}
 </style>
