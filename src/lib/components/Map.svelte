@@ -227,11 +227,11 @@
 <style>
 	.content {
 		--grid-template-areas: "map info";
-		--grid-template-columns: 2fr 1fr;
+		--grid-template-columns: 2fr minmax(320px, 400px);
 		--grid-template-rows: auto;
 
 		@media screen and (max-width: 930px) {
-			--grid-template-areas: "info" "map";
+			--grid-template-areas: "map" "info";
 			--grid-template-columns: 1fr;
 			--grid-template-rows: minmax(500px, 1fr) 1fr;
 		}
@@ -249,6 +249,7 @@
 	.content__map {
 		grid-area: map;
 		align-self: center;
+		border-radius: var(--border-radius);
 	}
 
 	.content__info {

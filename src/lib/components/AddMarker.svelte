@@ -24,12 +24,12 @@
 
 		<div class="form__input" role="presentation">
 			<label for="lat">Latitude</label>
-		<input type="text" readonly name="lat" value={latLng?.lat.toFixed(6)} />
+		<input type="text" readonly name="lat" value={latLng?.lat.toFixed(6) ?? 'n/a'} />
 		</div>
 
 		<div class="form__input" role="presentation">
 			<label for="lat">Longitude</label>
-		<input type="text" readonly name="lng" value={latLng?.lng.toFixed(6)} />
+		<input type="text" readonly name="lng" value={latLng?.lng.toFixed(6) ?? 'n/a'} />
 		</div>
 
 		<div class="form__input" role="presentation">
@@ -51,13 +51,10 @@
 		</div>
 
 		<div class="form__input" role="presentation">
-		<div class="lmh-container">
 			<LowMidHigh
 				legend="Water availability"
 				tooltip="How easy it is to restock on water on the location. For example, None means there is no water available, while High means that there is plenty of water sources available in the vicinity."
 			/>
-
-		</div>
 		</div>
 
 		<div class="form__input" role="presentation">
@@ -70,13 +67,10 @@
 		</div>
 
 		<div class="form__input" role="presentation">
-		<div class="lmh-container">
 			<LowMidHigh
 				legend="Vehicle accessibility"
 				tooltip="How easy it is to access the location with a vehicle. A None means a vehicle has to be parked far away, while High means the vehicle can be in the near vicinity."
 			/>
-
-		</div>
 		</div>
 
 		<div class="form__input" role="presentation">
@@ -117,6 +111,7 @@
 		color: var(--color-primary);
 		padding-block: 1.5rem;
 		padding-inline: 1.5rem;
+		border-radius: var(--border-radius);
 
 		display: flex;
 		flex-direction: column;
