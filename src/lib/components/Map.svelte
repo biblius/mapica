@@ -1,12 +1,12 @@
 <script lang="ts">
+	import { fetchJson } from '$lib/utils';
+	import { iconFor } from '$lib/utils/leaflet';
 	import L, { LatLng, Marker as LMarker, type LeafletMouseEvent } from 'leaflet';
 	import { onMount } from 'svelte';
-	import iconPin from '$lib/assets/location-pin-svgrepo-com.svg';
-	import iconLeggiero from '$lib/assets/leggiero-pin.png';
-	import iconAdventure from '$lib/assets/mountain-pin.png';
 	import type { Location as LocationM } from '$lib/types';
 	import Location from './Location.svelte';
-	import AddMarker from './AddMarker.svelte';
+	import MarkerPanel from './MarkerPanel.svelte';
+	import LocationList from './LocationList.svelte';
 
 	// Initial locations to set up markers for.
 	export let locations: LocationM[];
@@ -49,17 +49,18 @@
 		if (pin) {
 			pin.setLatLng(e.latlng);
 		} else {
-			pin = L.marker(e.latlng, { icon: mIconLeggiero() }).addTo(map!);
+			pin = L.marker(e.latlng, { icon: iconFor('default') })
+				.on('click', removePin)
+				.addTo(map!);
 		}
 
 		pinLatLng = pin.getLatLng();
 
 		const place = await reverseLookup(e.latlng.lat, e.latlng.lng);
 		locationNamePlaceholder =
-			place.name ||
-			place.address.village ||
-			place.address.town ||
-			place.address.county ||
+			place.address?.village ||
+			place.address?.town ||
+			place.address?.county ||
 			'My awesome location';
 
 		// Turn off location info to show the Add marker panel
@@ -68,48 +69,26 @@
 		}
 	}
 
+	// Removes the working marker from the map if it exists.
+	function removePin() {
+		if (!pin) return;
+		map.removeLayer(pin);
+		pin = undefined;
+		pinLatLng = undefined;
+	}
+
 	// Search nominatim for the closest OSM object for the given coordinates and return it.
 	async function reverseLookup(lat: number, lng: number): Promise<{ name: string }> {
-		const res = await fetch(
+		return fetchJson(
 			`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`
 		);
-		const data = await res.json();
-		return data;
-	}
-
-	// Default marker icon.
-	function mIconPin() {
-		return L.icon({
-			iconUrl: iconPin,
-			iconSize: [38, 95],
-			iconAnchor: [19, 70],
-			popupAnchor: [-3, -76]
-		});
-	}
-
-	function mIconLeggiero() {
-		return L.icon({
-			iconUrl: iconLeggiero,
-			iconSize: [60, 60],
-			iconAnchor: [31, 72],
-			popupAnchor: [-3, -76]
-		});
-	}
-
-	function mIconAdventure() {
-		return L.icon({
-			iconUrl: iconAdventure,
-			iconSize: [70, 60],
-			iconAnchor: [37, 70],
-			popupAnchor: [-3, -76]
-		});
 	}
 
 	// Adds a marker to the map.
 	async function addMarker(location: LocationM) {
 		const mark = L.marker([location.lat, location.lng], {
 			title: location.name,
-			icon: location.type === 'adventure' ? mIconAdventure() : mIconLeggiero()
+			icon: iconFor(location.type)
 		})
 			.on('click', () => toggleLocationInfo(location))
 			.addTo(map);
@@ -119,24 +98,15 @@
 
 	// Displays/hides the location info sidebar.
 	async function toggleLocationInfo(marker: LocationM) {
-		// Toggle off
-
+		// off
 		if (locationInfo && locationInfo.id === marker.id) {
 			locationInfo = undefined;
 			return;
 		}
 
-		// Toggle on
-
-		// Remove pin if exists
-		if (pin) {
-			map.removeLayer(pin);
-			pin = undefined;
-			pinLatLng = undefined;
-		}
-
-		const data = await fetch(`/api/locations?id=${marker.id}`);
-		locationInfo = await data.json();
+		// on
+		removePin();
+		locationInfo = await fetchJson(`/api/locations?id=${marker.id}`);
 	}
 
 	// Submits the current pin and info to the database and clears the pin.
@@ -156,37 +126,22 @@
 		const vaNote = data.get('va-note');
 		const locType = data.get('location-type');
 
-		const res = await fetch('/api/locations', {
+		const location: LocationM = await fetchJson('/api/locations', {
 			method: 'POST',
 			body: JSON.stringify({ name, lat, lng, desc, wa, waNote, va, vaNote, type: locType })
 		});
 
-		const marker = await res.json();
-
-		addMarker(marker);
-
-		if (pin) {
-			map.removeLayer(pin);
-			pin = undefined;
-			pinLatLng = undefined;
-		}
+		addMarker(location);
+		removePin();
 	}
 
+	// Used to change the icon of the working marker.
 	function togglePinIcon(e: Event) {
 		if (!pin) return;
 
 		const select = e.target as HTMLSelectElement;
 
-		switch (select.value) {
-			case 'adventure':
-				pin.setIcon(mIconAdventure());
-				break;
-			case 'leggiero':
-				pin.setIcon(mIconLeggiero());
-				break;
-			default:
-				pin.setIcon(mIconPin());
-		}
+		pin.setIcon(iconFor(select.value));
 	}
 
 	onMount(() => {
@@ -211,14 +166,19 @@
 	<section id="location-info" class="content__info">
 		{#if locationInfo}
 			<Location location={locationInfo} />
-		{:else}
-			<div id="add-marker">
-				<AddMarker
-					namePlaceholder={locationNamePlaceholder || 'My awesome location'}
-					latLng={pinLatLng}
+		{:else if pin}
+			<div id="marker-panel">
+				<MarkerPanel
+					init={{ name: locationNamePlaceholder, latlng: pinLatLng }}
 					onSubmit={createMarker}
 					onTypeChange={togglePinIcon}
 				/>
+			</div>
+		{:else}
+			<div>
+				{#each locations as location}
+					<LocationList {location} onClick={() => toggleLocationInfo(location)} />
+				{/each}
 			</div>
 		{/if}
 	</section>
@@ -226,12 +186,12 @@
 
 <style>
 	.content {
-		--grid-template-areas: "map info";
+		--grid-template-areas: 'map info';
 		--grid-template-columns: 2fr minmax(320px, 400px);
 		--grid-template-rows: auto;
 
 		@media screen and (max-width: 930px) {
-			--grid-template-areas: "map" "info";
+			--grid-template-areas: 'map' 'info';
 			--grid-template-columns: 1fr;
 			--grid-template-rows: minmax(500px, 1fr) 1fr;
 		}

@@ -1,6 +1,9 @@
+/**
+ * Main location model.
+ */
 export type Location = {
-	description: string;
 	id: number;
+	description: string;
 	lat: number;
 	lng: number;
 	name: string;
