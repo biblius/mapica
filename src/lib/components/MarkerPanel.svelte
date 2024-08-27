@@ -1,20 +1,56 @@
 <script lang="ts">
 	import { LatLng } from 'leaflet';
 	import LowMidHigh from './LowMidHigh.svelte';
+	import type { Location } from '$lib/types';
+	import { errV } from '$lib/utils/';
 
 	// Initial values for the form, useful when updating markers.
 	export let init: {
 		name: string;
-		latlng?: LatLng;
-		type?: string;
+		latlng: LatLng;
 		desc?: string;
+		type?: string;
 		wa?: string;
 		waNote?: string;
 		va?: string;
 		vaNote?: string;
 	};
-	export let onSubmit: (e: SubmitEvent) => void;
+	export let onSubmit: (e: Location) => void;
 	export let onTypeChange: (e: Event) => void;
+
+	// There's probably a more idiomatic way of doing this, but I can't frontend.
+	function locationFormData(event: SubmitEvent): Location {
+		const data = new FormData(event.target as HTMLFormElement);
+
+		// Mandatory
+		const name = data.get('name')?.toString();
+		const lat = data.get('lat')?.toString();
+		const lng = data.get('lng')?.toString();
+
+		if (!name) throw errV('name', 'Missing');
+		if (!lat) throw errV('lat', 'Missing');
+		if (!lng) throw errV('lng', 'Missing');
+
+		// Optional
+		const desc = data.get('description');
+		const wa = data.get('water-availability');
+		const waNote = data.get('wa-note');
+		const va = data.get('vehicle-accessibility');
+		const vaNote = data.get('va-note');
+		const locType = data.get('location-type');
+
+		return {
+			name,
+			lat: parseFloat(lat),
+			lng: parseFloat(lng),
+			desc,
+			wa,
+			waNote,
+			va,
+			vaNote,
+			type: locType
+		};
+	}
 
 	let selectedType = init.type;
 	$: latLng = init.latlng;
@@ -26,7 +62,7 @@
 	</header>
 
 	<section class="card__content">
-		<form on:submit|preventDefault={onSubmit} id="add-marker-form">
+		<form on:submit|preventDefault={(e) => onSubmit(locationFormData(e))} id="add-marker-form">
 			<div class="form__container" role="presentation">
 				<div class="form__input" role="presentation">
 					<label for="lat">Latitude</label>

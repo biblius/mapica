@@ -33,7 +33,7 @@ export function mIconAdventure() {
 }
 
 /** Returns an icon depending on the location type. */
-export function iconFor(value: string): L.Icon {
+export function iconFor(value: sthrowValidationtring): L.Icon {
 	switch (value) {
 		case 'adventure':
 			return mIconAdventure();

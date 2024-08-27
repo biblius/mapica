@@ -78,7 +78,10 @@
 	}
 
 	// Search nominatim for the closest OSM object for the given coordinates and return it.
-	async function reverseLookup(lat: number, lng: number): Promise<{ name: string }> {
+	async function reverseLookup(
+		lat: number,
+		lng: number
+	): Promise<{ name: string; address: { village?: string; town?: string; county?: string } }> {
 		return fetchJson(
 			`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`
 		);
@@ -88,7 +91,7 @@
 	async function addMarker(location: LocationM) {
 		const mark = L.marker([location.lat, location.lng], {
 			title: location.name,
-			icon: iconFor(location.type)
+			icon: iconFor(location.type || 'default')
 		})
 			.on('click', () => toggleLocationInfo(location))
 			.addTo(map);
@@ -110,25 +113,10 @@
 	}
 
 	// Submits the current pin and info to the database and clears the pin.
-	async function createMarker(event: SubmitEvent) {
-		const data = new FormData(event.target as HTMLFormElement);
-
-		// Mandatory
-		const name = data.get('name')?.toString();
-		const lat = data.get('lat');
-		const lng = data.get('lng');
-
-		// Optional
-		const desc = data.get('description');
-		const wa = data.get('water-availability');
-		const waNote = data.get('wa-note');
-		const va = data.get('vehicle-accessibility');
-		const vaNote = data.get('va-note');
-		const locType = data.get('location-type');
-
+	async function createMarker(inLocation: LocationM) {
 		const location: LocationM = await fetchJson('/api/locations', {
 			method: 'POST',
-			body: JSON.stringify({ name, lat, lng, desc, wa, waNote, va, vaNote, type: locType })
+			body: JSON.stringify(inLocation)
 		});
 
 		addMarker(location);
@@ -166,7 +154,7 @@
 	<section id="location-info" class="content__info">
 		{#if locationInfo}
 			<Location location={locationInfo} />
-		{:else if pin}
+		{:else if pin && pinLatLng}
 			<div id="marker-panel">
 				<MarkerPanel
 					init={{ name: locationNamePlaceholder, latlng: pinLatLng }}
